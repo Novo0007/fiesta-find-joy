@@ -8,62 +8,92 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import EventCard from "@/components/EventCard";
+import { useEvents } from "@/hooks/useEvents";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-
-  // Mock data for featured events
-  const featuredEvents = [
-    {
-      id: 1,
-      title: "Tech Conference 2024",
-      description: "Join industry leaders for cutting-edge tech discussions",
-      date: "2024-07-15",
-      time: "09:00",
-      venue: "Convention Center, Downtown",
-      price: 149,
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-      category: "Technology",
-      organizer: "TechCorp",
-      attendees: 234
-    },
-    {
-      id: 2,
-      title: "Summer Music Festival",
-      description: "Three days of amazing music and food",
-      date: "2024-08-01",
-      time: "16:00",
-      venue: "Central Park",
-      price: 89,
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
-      category: "Music",
-      organizer: "Music Events Co",
-      attendees: 1547
-    },
-    {
-      id: 3,
-      title: "Digital Marketing Workshop",
-      description: "Learn the latest strategies from marketing experts",
-      date: "2024-07-25",
-      time: "14:00",
-      venue: "Business Hub, City Center",
-      price: 75,
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
-      category: "Business",
-      organizer: "MarketPro",
-      attendees: 89
-    }
-  ];
+  
+  const { data: events = [], isLoading, error } = useEvents();
 
   const categories = ["all", "Technology", "Music", "Business", "Food", "Sports", "Art"];
 
-  const filteredEvents = featuredEvents.filter(event => {
+  const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
+                         (event.description || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || event.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Convert database events to the format expected by EventCard
+  const formattedEvents = filteredEvents.map(event => ({
+    id: parseInt(event.id.split('-')[0], 16), // Simple conversion for display
+    title: event.title,
+    description: event.description || "",
+    date: event.date,
+    time: event.time,
+    venue: event.venue,
+    price: event.price,
+    image: event.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87",
+    category: event.category || "General",
+    organizer: "EventHub", // Placeholder since we don't have organizer details yet
+    attendees: event.current_attendees
+  }));
+
+  const EventsSection = () => {
+    if (isLoading) {
+      return (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <Skeleton className="h-48 w-full rounded-lg" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="w-8 h-8 text-red-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">Failed to load events</h3>
+          <p className="text-gray-500">Please try again later</p>
+        </div>
+      );
+    }
+
+    if (formattedEvents.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">No events found</h3>
+          <p className="text-gray-500">Try adjusting your search or filters</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {formattedEvents.map((event) => (
+          <EventCard key={event.id} event={event} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -203,21 +233,7 @@ const Index = () => {
           </div>
 
           {/* Events Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-
-          {filteredEvents.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No events found</h3>
-              <p className="text-gray-500">Try adjusting your search or filters</p>
-            </div>
-          )}
+          <EventsSection />
         </div>
       </section>
 

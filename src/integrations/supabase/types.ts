@@ -9,16 +9,221 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_code: string | null
+          created_at: string | null
+          event_id: string
+          id: string
+          payment_id: string | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          tickets: number | null
+          total_amount: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_code?: string | null
+          created_at?: string | null
+          event_id: string
+          id?: string
+          payment_id?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          tickets?: number | null
+          total_amount: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_code?: string | null
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          payment_id?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          tickets?: number | null
+          total_amount?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          current_attendees: number | null
+          date: string
+          description: string | null
+          id: string
+          image: string | null
+          max_attendees: number | null
+          organizer_id: string
+          price: number | null
+          status: string | null
+          tags: string[] | null
+          time: string
+          title: string
+          updated_at: string | null
+          venue: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          current_attendees?: number | null
+          date: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          max_attendees?: number | null
+          organizer_id: string
+          price?: number | null
+          status?: string | null
+          tags?: string[] | null
+          time: string
+          title: string
+          updated_at?: string | null
+          venue: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          current_attendees?: number | null
+          date?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          max_attendees?: number | null
+          organizer_id?: string
+          price?: number | null
+          status?: string | null
+          tags?: string[] | null
+          time?: string
+          title?: string
+          updated_at?: string | null
+          venue?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          event_id: string
+          id: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          event_id: string
+          id?: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_booking_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      user_role: "user" | "organizer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +338,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      user_role: ["user", "organizer", "admin"],
+    },
   },
 } as const
