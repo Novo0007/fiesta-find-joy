@@ -12,6 +12,9 @@ export type Database = {
       bookings: {
         Row: {
           booking_code: string | null
+          buyer_email: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
           created_at: string | null
           event_id: string
           id: string
@@ -24,6 +27,9 @@ export type Database = {
         }
         Insert: {
           booking_code?: string | null
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
           created_at?: string | null
           event_id: string
           id?: string
@@ -36,6 +42,9 @@ export type Database = {
         }
         Update: {
           booking_code?: string | null
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
           created_at?: string | null
           event_id?: string
           id?: string
@@ -70,6 +79,8 @@ export type Database = {
           price: number | null
           status: string | null
           tags: string[] | null
+          ticket_limit: number | null
+          tickets_sold: number | null
           time: string
           title: string
           updated_at: string | null
@@ -88,6 +99,8 @@ export type Database = {
           price?: number | null
           status?: string | null
           tags?: string[] | null
+          ticket_limit?: number | null
+          tickets_sold?: number | null
           time: string
           title: string
           updated_at?: string | null
@@ -106,6 +119,8 @@ export type Database = {
           price?: number | null
           status?: string | null
           tags?: string[] | null
+          ticket_limit?: number | null
+          tickets_sold?: number | null
           time?: string
           title?: string
           updated_at?: string | null
