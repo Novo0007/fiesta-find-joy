@@ -17,16 +17,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, loading, signOut } = useAuth();
+  const { canManageEvents, userRole } = useUserRole();
   const notifications = 3; // Mock notifications
 
-  const navigationItems = [
+  const baseNavigationItems = [
     { name: "Browse Events", href: "/browse", icon: Search },
-    { name: "Create Event", href: "/create-event", icon: Calendar },
   ];
+
+  // Add Create Event link only for organizers and admins
+  const navigationItems = canManageEvents 
+    ? [...baseNavigationItems, { name: "Create Event", href: "/create-event", icon: Calendar }]
+    : baseNavigationItems;
 
   const handleSignOut = async () => {
     await signOut();
@@ -35,6 +41,17 @@ const Header = () => {
   const getUserInitials = (name?: string) => {
     if (!name) return "U";
     return name.split(" ").map(n => n[0]).join("").toUpperCase();
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-red-500 text-white';
+      case 'organizer':
+        return 'bg-blue-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
   };
 
   return (
@@ -103,6 +120,11 @@ const Header = () => {
                     <div className="flex flex-col space-y-1 p-2">
                       <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || "User"}</p>
                       <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      {userRole && (
+                        <Badge className={`text-xs w-fit mt-1 ${getRoleBadgeColor(userRole)}`}>
+                          {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                        </Badge>
+                      )}
                     </div>
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
@@ -169,6 +191,11 @@ const Header = () => {
                       <div className="flex flex-col">
                         <p className="text-sm font-medium">{user.user_metadata?.full_name || "User"}</p>
                         <p className="text-xs text-muted-foreground">{user.email}</p>
+                        {userRole && (
+                          <Badge className={`text-xs w-fit mt-1 ${getRoleBadgeColor(userRole)}`}>
+                            {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                     <Button variant="ghost" className="justify-start" onClick={handleSignOut}>

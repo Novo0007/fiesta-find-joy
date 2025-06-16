@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, MapPin, DollarSign, Users, Image, Tag } from "lucide-react";
@@ -9,10 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Header from "@/components/Header";
+import RoleProtectedRoute from "@/components/RoleProtectedRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const CreateEvent = () => {
+const CreateEventContent = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -70,11 +70,19 @@ const CreateEvent = () => {
         });
 
       if (error) {
-        toast({
-          title: "Error Creating Event",
-          description: error.message,
-          variant: "destructive",
-        });
+        if (error.message.includes('row-level security policy')) {
+          toast({
+            title: "Permission Denied",
+            description: "You don't have permission to create events. Only organizers and administrators can create events.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error Creating Event",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Event Created Successfully!",
@@ -257,6 +265,14 @@ const CreateEvent = () => {
         </Card>
       </div>
     </div>
+  );
+};
+
+const CreateEvent = () => {
+  return (
+    <RoleProtectedRoute requireManageEvents={true}>
+      <CreateEventContent />
+    </RoleProtectedRoute>
   );
 };
 

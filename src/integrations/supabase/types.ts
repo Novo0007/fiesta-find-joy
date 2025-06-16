@@ -211,19 +211,59 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role_type"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role_type"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_manage_events: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
       generate_booking_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["user_role_type"]
+      }
+      has_role: {
+        Args: {
+          user_uuid: string
+          required_role: Database["public"]["Enums"]["user_role_type"]
+        }
+        Returns: boolean
       }
     }
     Enums: {
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
       user_role: "user" | "organizer" | "admin"
+      user_role_type: "user" | "organizer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -341,6 +381,7 @@ export const Constants = {
     Enums: {
       booking_status: ["pending", "confirmed", "cancelled", "completed"],
       user_role: ["user", "organizer", "admin"],
+      user_role_type: ["user", "organizer", "admin"],
     },
   },
 } as const
