@@ -1,26 +1,41 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Calendar, User, Bell, Search } from "lucide-react";
+import { Menu, X, Calendar, User, Bell, Search, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // Mock auth state - replace with actual auth context
-  const isAuthenticated = false;
-  const notifications = 3;
+  const { user, loading, signOut } = useAuth();
+  const notifications = 3; // Mock notifications
 
   const navigationItems = [
     { name: "Browse Events", href: "/browse", icon: Search },
     { name: "Create Event", href: "/create-event", icon: Calendar },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  const getUserInitials = (name?: string) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase();
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
@@ -52,7 +67,7 @@ const Header = () => {
 
           {/* Desktop Auth/User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            {!isAuthenticated ? (
+            {!user && !loading ? (
               <div className="flex items-center space-x-3">
                 <Link to="/auth">
                   <Button variant="ghost" className="text-gray-600 hover:text-blue-600">
@@ -65,7 +80,7 @@ const Header = () => {
                   </Button>
                 </Link>
               </div>
-            ) : (
+            ) : user ? (
               <div className="flex items-center space-x-3">
                 <Button variant="ghost" size="sm" className="relative">
                   <Bell className="w-5 h-5" />
@@ -75,14 +90,28 @@ const Header = () => {
                     </Badge>
                   )}
                 </Button>
-                <Link to="/dashboard">
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                    <User className="w-5 h-5" />
-                    <span>Dashboard</span>
-                  </Button>
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
+                        <AvatarFallback>{getUserInitials(user.user_metadata?.full_name)}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="flex flex-col space-y-1 p-2">
+                      <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || "User"}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    </div>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Sign Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,7 +146,7 @@ const Header = () => {
                   ))}
                 </nav>
 
-                {!isAuthenticated ? (
+                {!user && !loading ? (
                   <div className="flex flex-col space-y-3 pt-6 border-t">
                     <Link to="/auth" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" className="w-full">
@@ -130,25 +159,24 @@ const Header = () => {
                       </Button>
                     </Link>
                   </div>
-                ) : (
+                ) : user ? (
                   <div className="flex flex-col space-y-3 pt-6 border-t">
-                    <Button variant="ghost" className="justify-start">
-                      <Bell className="w-5 h-5 mr-3" />
-                      Notifications
-                      {notifications > 0 && (
-                        <Badge className="ml-auto bg-red-500 text-white">
-                          {notifications}
-                        </Badge>
-                      )}
+                    <div className="flex items-center space-x-3 px-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
+                        <AvatarFallback>{getUserInitials(user.user_metadata?.full_name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium">{user.user_metadata?.full_name || "User"}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" className="justify-start" onClick={handleSignOut}>
+                      <LogOut className="w-5 h-5 mr-3" />
+                      Sign Out
                     </Button>
-                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        <User className="w-5 h-5 mr-3" />
-                        Dashboard
-                      </Button>
-                    </Link>
                   </div>
-                )}
+                ) : null}
               </div>
             </SheetContent>
           </Sheet>
