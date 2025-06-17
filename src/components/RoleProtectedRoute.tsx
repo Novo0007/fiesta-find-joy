@@ -1,10 +1,11 @@
 
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RoleProtectedRouteProps {
   children: ReactNode;
@@ -19,6 +20,7 @@ const RoleProtectedRoute = ({
 }: RoleProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const { userRole, loading: roleLoading, canManageEvents, isAdmin } = useUserRole();
+  const location = useLocation();
 
   if (authLoading || roleLoading) {
     return (
@@ -32,7 +34,7 @@ const RoleProtectedRoute = ({
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   const hasRequiredAccess = () => {
@@ -61,12 +63,22 @@ const RoleProtectedRoute = ({
                 requiredRole === 'admin' ? 'administrators' : 'organizers'
               }.
             </p>
-            <p className="text-sm text-gray-500 mb-2">
-              Current role: <span className="font-semibold capitalize">{userRole}</span>
+            <p className="text-sm text-gray-500 mb-4">
+              Current role: <span className="font-semibold capitalize">{userRole || 'loading...'}</span>
             </p>
-            <p className="text-xs text-gray-400">
-              If you believe this is an error, please try signing out and signing back in.
-            </p>
+            <div className="space-y-2">
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline" 
+                className="w-full"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh Page
+              </Button>
+              <p className="text-xs text-gray-400">
+                If you believe this is an error, try refreshing the page or contact support.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

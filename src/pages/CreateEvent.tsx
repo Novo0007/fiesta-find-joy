@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, MapPin, DollarSign, Users, Image, Tag } from "lucide-react";
@@ -11,10 +12,14 @@ import Header from "@/components/Header";
 import RoleProtectedRoute from "@/components/RoleProtectedRoute";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const CreateEventContent = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { userRole, canManageEvents } = useUserRole();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -39,22 +44,32 @@ const CreateEventContent = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create an event.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    if (!canManageEvents) {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to create events. Only organizers and administrators can create events.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Creating event with user:', user.id, 'role:', userRole);
       
-      if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to create an event.",
-          variant: "destructive",
-        });
-        navigate("/auth");
-        return;
-      }
-
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('events')
         .insert({
           title: formData.title,
@@ -66,36 +81,41 @@ const CreateEventContent = () => {
           max_attendees: formData.maxAttendees ? parseInt(formData.maxAttendees) : null,
           category: formData.category,
           image: formData.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87",
-          organizer_id: user.id
-        });
+          organizer_id: user.id,
+          status: 'active'
+        })
+        .select()
+        .single();
 
       if (error) {
-        if (error.message.includes('row-level security policy')) {
-          toast({
-            title: "Permission Denied",
-            description: "You don't have permission to create events. Only organizers and administrators can create events.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Error Creating Event",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
+        console.error('Event creation error:', error);
+        throw error;
+      }
+
+      console.log('Event created successfully:', data);
+      
+      toast({
+        title: "Event Created Successfully!",
+        description: "Your event has been published and is now live.",
+      });
+      
+      navigate("/");
+    } catch (error: any) {
+      console.error('Error creating event:', error);
+      
+      if (error.message?.includes('row-level security policy')) {
+        toast({
+          title: "Permission Denied",
+          description: "You don't have permission to create events. Please contact an administrator.",
+          variant: "destructive",
+        });
       } else {
         toast({
-          title: "Event Created Successfully!",
-          description: "Your event has been published.",
+          title: "Error Creating Event",
+          description: error.message || "An unexpected error occurred. Please try again.",
+          variant: "destructive",
         });
-        navigate("/");
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -111,6 +131,9 @@ const CreateEventContent = () => {
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Create New Event
             </CardTitle>
+            <p className="text-gray-600 mt-2">
+              Current role: <span className="font-semibold capitalize">{userRole}</span>
+            </p>
           </CardHeader>
           
           <CardContent>
@@ -189,7 +212,7 @@ const CreateEventContent = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price ($)</Label>
+                  <Label htmlFor="price">Price (₹)</Label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
@@ -256,10 +279,16 @@ const CreateEventContent = () => {
               <Button 
                 type="submit" 
                 className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all duration-300 hover:scale-105"
-                disabled={isLoading}
+                disabled={isLoading || !canManageEvents}
               >
                 {isLoading ? "Creating Event..." : "Create Event"}
               </Button>
+              
+              {!canManageEvents && (
+                <p className="text-sm text-red-600 text-center">
+                  You need organizer or admin privileges to create events.
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>

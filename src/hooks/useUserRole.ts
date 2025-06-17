@@ -29,34 +29,36 @@ export const useUserRole = () => {
           .eq('user_id', user.id)
           .order('assigned_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
-        if (error) {
-          if (error.code === 'PGRST116') {
-            // No role found, try to insert default role
-            console.log('No role found for user, inserting default user role');
-            const { error: insertError } = await supabase
-              .from('user_roles')
-              .insert({
-                user_id: user.id,
-                role: 'user'
-              });
-            
-            if (insertError) {
-              console.error('Error inserting default role:', insertError);
-            }
-            
-            setUserRole('user');
-          } else {
-            console.error('Error fetching user role:', error);
-            setUserRole('user'); // Default to user role on error
-          }
-        } else {
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching user role:', error);
+          setUserRole('user'); // Default to user role on error
+          setLoading(false);
+          return;
+        }
+
+        if (data) {
           console.log('User role found:', data.role);
           setUserRole(data.role);
+        } else {
+          // No role found, create default user role
+          console.log('No role found for user, creating default user role');
+          const { error: insertError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: user.id,
+              role: 'user'
+            });
+          
+          if (insertError) {
+            console.error('Error creating default role:', insertError);
+          }
+          
+          setUserRole('user');
         }
       } catch (error) {
-        console.error('Error fetching user role:', error);
+        console.error('Error in fetchUserRole:', error);
         setUserRole('user'); // Default to user role
       } finally {
         setLoading(false);
@@ -64,7 +66,7 @@ export const useUserRole = () => {
     };
 
     fetchUserRole();
-  }, [user?.id]); // Add dependency on user.id to refetch when user changes
+  }, [user?.id]);
 
   const canManageEvents = userRole === 'organizer' || userRole === 'admin';
   const isAdmin = userRole === 'admin';
