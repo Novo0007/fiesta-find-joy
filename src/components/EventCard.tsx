@@ -64,7 +64,9 @@ const EventCard = ({ event, onBookingComplete }: EventCardProps) => {
     organizer_id: event.organizer_id,
     status: event.status || "active",
     created_at: event.created_at || "",
-    updated_at: event.updated_at || ""
+    updated_at: event.updated_at || "",
+    tickets_sold: event.tickets_sold || 0,
+    ticket_limit: event.ticket_limit
   };
 
   return (
