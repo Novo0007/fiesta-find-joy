@@ -19,6 +19,8 @@ export interface Event {
   status: string;
   created_at: string;
   updated_at: string;
+  tickets_sold: number;
+  ticket_limit: number | null;
 }
 
 export const useEvents = () => {
