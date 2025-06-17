@@ -21,6 +21,13 @@ const MyBookings = () => {
     });
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+    }).format(amount);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'confirmed':
@@ -120,7 +127,7 @@ const MyBookings = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-blue-600">
-                        ${booking.total_amount}
+                        {formatCurrency(booking.total_amount)}
                       </p>
                       <p className="text-sm text-gray-500">
                         {booking.tickets} ticket{booking.tickets > 1 ? 's' : ''}

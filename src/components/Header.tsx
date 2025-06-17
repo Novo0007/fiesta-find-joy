@@ -50,6 +50,19 @@ const Header = () => {
     return email.substring(0, 2).toUpperCase();
   };
 
+  const getRoleDisplayName = (role: string | null) => {
+    if (!role) return 'User';
+    switch (role) {
+      case 'admin':
+        return 'Administrator';
+      case 'organizer':
+        return 'Event Organizer';
+      case 'user':
+      default:
+        return 'User';
+    }
+  };
+
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,8 +121,8 @@ const Header = () => {
                   <DropdownMenuContent className="w-56 mr-4" align="end">
                     <div className="px-3 py-2">
                       <p className="text-sm font-medium">{user.email}</p>
-                      <p className="text-xs text-gray-500 capitalize">
-                        {roleLoading ? 'Loading...' : (userRole || 'user')} account
+                      <p className="text-xs text-gray-500">
+                        {roleLoading ? 'Loading...' : getRoleDisplayName(userRole)}
                       </p>
                     </div>
                     <DropdownMenuSeparator />

@@ -35,6 +35,13 @@ const TicketBookingModal = ({ event, isOpen, onClose, onBookingComplete }: Ticke
   const availableTickets = event.max_attendees ? event.max_attendees - event.current_attendees : 999;
   const maxTickets = Math.min(availableTickets, 10); // Limit to 10 tickets per purchase
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+    }).format(amount);
+  };
+
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -126,7 +133,7 @@ const TicketBookingModal = ({ event, isOpen, onClose, onBookingComplete }: Ticke
               </div>
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-lg px-3 py-1">
-                  {event.price === 0 ? 'Free' : `$${event.price} per ticket`}
+                  {event.price === 0 ? 'Free' : `${formatCurrency(event.price)} per ticket`}
                 </Badge>
                 <span className="text-sm text-gray-500">
                   {availableTickets} tickets available
@@ -228,12 +235,12 @@ const TicketBookingModal = ({ event, isOpen, onClose, onBookingComplete }: Ticke
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
                   <span>{ticketQuantity} × {event.title}</span>
-                  <span>${(event.price * ticketQuantity).toFixed(2)}</span>
+                  <span>{formatCurrency(event.price * ticketQuantity)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-blue-600">${totalPrice.toFixed(2)}</span>
+                  <span className="text-blue-600">{formatCurrency(totalPrice)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -254,7 +261,7 @@ const TicketBookingModal = ({ event, isOpen, onClose, onBookingComplete }: Ticke
                 className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 disabled={loading || availableTickets < ticketQuantity}
               >
-                {loading ? "Processing..." : `Confirm Booking - $${totalPrice.toFixed(2)}`}
+                {loading ? "Processing..." : `Confirm Booking - ${formatCurrency(totalPrice)}`}
               </Button>
             </div>
           </form>
