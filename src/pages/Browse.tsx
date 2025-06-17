@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Search, Filter, Calendar, MapPin, DollarSign, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import Header from "@/components/Header";
 import EventCard from "@/components/EventCard";
+import { Event } from "@/hooks/useEvents";
 
 const Browse = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,85 +25,127 @@ const Browse = () => {
   const [dateFilter, setDateFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
 
-  // Mock events data
-  const allEvents = [
+  // Mock events data - formatted to match Event interface
+  const allEvents: Event[] = [
     {
-      id: 1,
+      id: "tech-conf-2024",
       title: "Tech Conference 2024",
       description: "Join industry leaders for cutting-edge tech discussions and networking opportunities",
       date: "2024-07-15",
-      time: "09:00",
+      time: "09:00:00",
       venue: "Convention Center, Downtown",
       price: 149,
+      max_attendees: 500,
+      current_attendees: 234,
       image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
       category: "Technology",
-      organizer: "TechCorp",
-      attendees: 234
+      tags: ["tech", "conference", "networking"],
+      organizer_id: "org-1",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z",
+      tickets_sold: 234,
+      ticket_limit: 500
     },
     {
-      id: 2,
+      id: "summer-music-fest",
       title: "Summer Music Festival",
       description: "Three days of amazing music, food trucks, and unforgettable memories",
       date: "2024-08-01",
-      time: "16:00",
+      time: "16:00:00",
       venue: "Central Park",
       price: 89,
+      max_attendees: 2000,
+      current_attendees: 1547,
       image: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
       category: "Music",
-      organizer: "Music Events Co",
-      attendees: 1547
+      tags: ["music", "festival", "outdoor"],
+      organizer_id: "org-2",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z",
+      tickets_sold: 1547,
+      ticket_limit: 2000
     },
     {
-      id: 3,
+      id: "digital-marketing-workshop",
       title: "Digital Marketing Workshop",
       description: "Learn the latest strategies from marketing experts and grow your business",
       date: "2024-07-25",
-      time: "14:00",
+      time: "14:00:00",
       venue: "Business Hub, City Center",
       price: 75,
+      max_attendees: 100,
+      current_attendees: 89,
       image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
       category: "Business",
-      organizer: "MarketPro",
-      attendees: 89
+      tags: ["business", "marketing", "workshop"],
+      organizer_id: "org-3",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z",
+      tickets_sold: 89,
+      ticket_limit: 100
     },
     {
-      id: 4,
+      id: "yoga-in-the-park",
       title: "Yoga in the Park",
       description: "Start your day with peaceful yoga sessions in beautiful outdoor settings",
       date: "2024-07-20",
-      time: "07:00",
+      time: "07:00:00",
       venue: "Riverside Park",
       price: 0,
+      max_attendees: 50,
+      current_attendees: 45,
       image: "https://images.unsplash.com/photo-1501854140801-50d01698950b",
       category: "Health",
-      organizer: "Wellness Community",
-      attendees: 45
+      tags: ["health", "yoga", "outdoor"],
+      organizer_id: "org-4",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z",
+      tickets_sold: 45,
+      ticket_limit: 50
     },
     {
-      id: 5,
+      id: "food-wine-tasting",
       title: "Food & Wine Tasting",
       description: "Explore exotic flavors and premium wines curated by top chefs",
       date: "2024-08-10",
-      time: "19:00",
+      time: "19:00:00",
       venue: "Grand Hotel Ballroom",
       price: 120,
+      max_attendees: 100,
+      current_attendees: 156,
       image: "https://images.unsplash.com/photo-1469041797191-50ace28483c3",
       category: "Food",
-      organizer: "Culinary Masters",
-      attendees: 156
+      tags: ["food", "wine", "tasting"],
+      organizer_id: "org-5",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z",
+      tickets_sold: 156,
+      ticket_limit: 100
     },
     {
-      id: 6,
+      id: "art-gallery-opening",
       title: "Art Gallery Opening",
       description: "Discover contemporary art from emerging and established artists",
       date: "2024-07-18",
-      time: "18:00",
+      time: "18:00:00",
       venue: "Modern Art Gallery",
       price: 25,
+      max_attendees: 50,
+      current_attendees: 78,
       image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
       category: "Art",
-      organizer: "Art Collective",
-      attendees: 78
+      tags: ["art", "gallery", "opening"],
+      organizer_id: "org-6",
+      status: "active",
+      created_at: "2024-01-01T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z",
+      tickets_sold: 78,
+      ticket_limit: 50
     }
   ];
 
@@ -111,12 +153,12 @@ const Browse = () => {
 
   const filteredEvents = allEvents.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (event.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
                          event.venue.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesCategory = selectedCategory === "all" || event.category === selectedCategory;
     
-    const matchesPrice = event.price >= priceRange[0] && event.price <= priceRange[1];
+    const matchesPrice = (event.price || 0) >= priceRange[0] && (event.price || 0) <= priceRange[1];
     
     let matchesDate = true;
     if (dateFilter !== "all") {
@@ -147,11 +189,11 @@ const Browse = () => {
       case "date":
         return new Date(a.date).getTime() - new Date(b.date).getTime();
       case "price-low":
-        return a.price - b.price;
+        return (a.price || 0) - (b.price || 0);
       case "price-high":
-        return b.price - a.price;
+        return (b.price || 0) - (a.price || 0);
       case "popular":
-        return b.attendees - a.attendees;
+        return (b.current_attendees || 0) - (a.current_attendees || 0);
       default:
         return 0;
     }

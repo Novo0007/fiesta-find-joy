@@ -26,21 +26,6 @@ const Index = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Convert database events to the format expected by EventCard
-  const formattedEvents = filteredEvents.map(event => ({
-    id: parseInt(event.id.split('-')[0], 16), // Simple conversion for display
-    title: event.title,
-    description: event.description || "",
-    date: event.date,
-    time: event.time,
-    venue: event.venue,
-    price: event.price,
-    image: event.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87",
-    category: event.category || "General",
-    organizer: "EventHub", // Placeholder since we don't have organizer details yet
-    attendees: event.current_attendees
-  }));
-
   const EventsSection = () => {
     if (isLoading) {
       return (
@@ -74,7 +59,7 @@ const Index = () => {
       );
     }
 
-    if (formattedEvents.length === 0) {
+    if (filteredEvents.length === 0) {
       return (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -88,7 +73,7 @@ const Index = () => {
 
     return (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {formattedEvents.map((event) => (
+        {filteredEvents.map((event) => (
           <EventCard key={event.id} event={event} />
         ))}
       </div>

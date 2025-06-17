@@ -57,10 +57,17 @@ export const useCreateBooking = () => {
       buyer_email: string;
       buyer_phone?: string;
     }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User must be authenticated to create booking');
+      }
+
       const { data, error } = await supabase
         .from('bookings')
         .insert({
           ...bookingData,
+          user_id: user.id,
           status: 'confirmed',
         })
         .select()
