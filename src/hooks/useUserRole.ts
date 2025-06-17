@@ -18,6 +18,9 @@ export const useUserRole = () => {
         return;
       }
 
+      console.log('Fetching role for user:', user.id);
+      setLoading(true);
+
       try {
         const { data, error } = await supabase
           .from('user_roles')
@@ -27,11 +30,18 @@ export const useUserRole = () => {
           .limit(1)
           .single();
 
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching user role:', error);
-          setUserRole('user'); // Default to user role
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No role found, default to user
+            console.log('No role found for user, defaulting to user role');
+            setUserRole('user');
+          } else {
+            console.error('Error fetching user role:', error);
+            setUserRole('user'); // Default to user role on error
+          }
         } else {
-          setUserRole(data?.role || 'user');
+          console.log('User role found:', data.role);
+          setUserRole(data.role);
         }
       } catch (error) {
         console.error('Error fetching user role:', error);
@@ -46,6 +56,8 @@ export const useUserRole = () => {
 
   const canManageEvents = userRole === 'organizer' || userRole === 'admin';
   const isAdmin = userRole === 'admin';
+
+  console.log('useUserRole state:', { userRole, loading, canManageEvents, isAdmin });
 
   return {
     userRole,

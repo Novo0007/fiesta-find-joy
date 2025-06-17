@@ -40,7 +40,16 @@ const Auth = () => {
 
       if (error) throw error;
 
-      if (data.user) {
+      if (data.user && !data.session) {
+        // User needs to verify email
+        toast({
+          title: "Check your email",
+          description: "We've sent you a verification link to complete your registration.",
+        });
+      } else if (data.user && data.session) {
+        // User is signed up and logged in
+        console.log('User signed up successfully:', data.user.id, 'with role:', selectedRole);
+        
         // Insert the user role into the user_roles table
         const { error: roleError } = await supabase
           .from('user_roles')
@@ -51,18 +60,25 @@ const Auth = () => {
 
         if (roleError) {
           console.error('Error setting user role:', roleError);
+          toast({
+            title: "Account created with limited access",
+            description: "Your account was created but there was an issue setting your role. Please contact support.",
+            variant: "destructive",
+          });
+        } else {
+          console.log('User role set successfully:', selectedRole);
+          toast({
+            title: "Account created successfully!",
+            description: selectedRole === "organizer" 
+              ? "Welcome! You can now create and manage events." 
+              : "Welcome! You can now browse and book tickets for events.",
+          });
         }
-
-        toast({
-          title: "Account created successfully!",
-          description: selectedRole === "organizer" 
-            ? "Welcome! You can now create and manage events." 
-            : "Welcome! You can now browse and book tickets for events.",
-        });
         
         navigate("/");
       }
     } catch (error: any) {
+      console.error('Signup error:', error);
       toast({
         title: "Sign up failed",
         description: error.message,

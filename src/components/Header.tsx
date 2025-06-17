@@ -25,7 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
   const { user } = useAuth();
-  const { canManageEvents, userRole } = useUserRole();
+  const { canManageEvents, userRole, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -70,7 +70,7 @@ const Header = () => {
             <Link to="/browse" className="text-gray-600 hover:text-blue-600 transition-colors">
               Browse Events
             </Link>
-            {canManageEvents && (
+            {!roleLoading && canManageEvents && (
               <Link to="/create-event" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Create Event
               </Link>
@@ -81,8 +81,8 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                {/* Create Event Button for Organizers */}
-                {canManageEvents && (
+                {/* Create Event Button for Organizers - Only show when role is loaded and user can manage events */}
+                {!roleLoading && canManageEvents && (
                   <Link to="/create-event">
                     <Button 
                       size="sm" 
@@ -109,7 +109,7 @@ const Header = () => {
                     <div className="px-3 py-2">
                       <p className="text-sm font-medium">{user.email}</p>
                       <p className="text-xs text-gray-500 capitalize">
-                        {userRole || 'user'} account
+                        {roleLoading ? 'Loading...' : (userRole || 'user')} account
                       </p>
                     </div>
                     <DropdownMenuSeparator />
