@@ -61,8 +61,11 @@ const RoleProtectedRoute = ({
                 requiredRole === 'admin' ? 'administrators' : 'organizers'
               }.
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mb-2">
               Current role: <span className="font-semibold capitalize">{userRole}</span>
+            </p>
+            <p className="text-xs text-gray-400">
+              If you believe this is an error, please try signing out and signing back in.
             </p>
           </CardContent>
         </Card>

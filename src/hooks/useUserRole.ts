@@ -22,6 +22,7 @@ export const useUserRole = () => {
       setLoading(true);
 
       try {
+        // First try to get the role from user_roles table
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
@@ -32,8 +33,19 @@ export const useUserRole = () => {
 
         if (error) {
           if (error.code === 'PGRST116') {
-            // No role found, default to user
-            console.log('No role found for user, defaulting to user role');
+            // No role found, try to insert default role
+            console.log('No role found for user, inserting default user role');
+            const { error: insertError } = await supabase
+              .from('user_roles')
+              .insert({
+                user_id: user.id,
+                role: 'user'
+              });
+            
+            if (insertError) {
+              console.error('Error inserting default role:', insertError);
+            }
+            
             setUserRole('user');
           } else {
             console.error('Error fetching user role:', error);
@@ -52,7 +64,7 @@ export const useUserRole = () => {
     };
 
     fetchUserRole();
-  }, [user]);
+  }, [user?.id]); // Add dependency on user.id to refetch when user changes
 
   const canManageEvents = userRole === 'organizer' || userRole === 'admin';
   const isAdmin = userRole === 'admin';

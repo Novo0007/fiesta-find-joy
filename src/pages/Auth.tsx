@@ -26,6 +26,8 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      console.log('Starting signup with role:', selectedRole);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -50,30 +52,55 @@ const Auth = () => {
         // User is signed up and logged in
         console.log('User signed up successfully:', data.user.id, 'with role:', selectedRole);
         
-        // Insert the user role into the user_roles table
-        const { error: roleError } = await supabase
+        // Wait a moment for the automatic trigger to potentially assign the default role
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Check if user already has a role (from the trigger)
+        const { data: existingRole } = await supabase
           .from('user_roles')
-          .insert({
-            user_id: data.user.id,
-            role: selectedRole,
-          });
-
-        if (roleError) {
-          console.error('Error setting user role:', roleError);
-          toast({
-            title: "Account created with limited access",
-            description: "Your account was created but there was an issue setting your role. Please contact support.",
-            variant: "destructive",
-          });
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+        
+        if (existingRole) {
+          console.log('Existing role found:', existingRole.role);
+          // Update the role if it's different from what the user selected
+          if (existingRole.role !== selectedRole) {
+            console.log('Updating role from', existingRole.role, 'to', selectedRole);
+            const { error: updateError } = await supabase
+              .from('user_roles')
+              .update({ role: selectedRole })
+              .eq('user_id', data.user.id);
+            
+            if (updateError) {
+              console.error('Error updating user role:', updateError);
+            } else {
+              console.log('Role updated successfully to:', selectedRole);
+            }
+          }
         } else {
-          console.log('User role set successfully:', selectedRole);
-          toast({
-            title: "Account created successfully!",
-            description: selectedRole === "organizer" 
-              ? "Welcome! You can now create and manage events." 
-              : "Welcome! You can now browse and book tickets for events.",
-          });
+          console.log('No existing role found, inserting new role:', selectedRole);
+          // Insert the user role
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: data.user.id,
+              role: selectedRole,
+            });
+
+          if (roleError) {
+            console.error('Error setting user role:', roleError);
+          } else {
+            console.log('User role set successfully:', selectedRole);
+          }
         }
+
+        toast({
+          title: "Account created successfully!",
+          description: selectedRole === "organizer" 
+            ? "Welcome! You can now create and manage events." 
+            : "Welcome! You can now browse and book tickets for events.",
+        });
         
         navigate("/");
       }
