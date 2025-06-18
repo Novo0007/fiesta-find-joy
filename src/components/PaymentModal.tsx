@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Event } from "@/hooks/useEvents";
 import { Calendar, MapPin, CreditCard, Ticket } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentModalProps {
   event: Event | null;
@@ -21,6 +22,13 @@ interface PaymentModalProps {
     totalPrice: number;
   } | null;
   onPaymentSuccess: () => void;
+}
+
+// Declare Razorpay interface for TypeScript
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
 }
 
 const PaymentModal = ({ event, isOpen, onClose, bookingData, onPaymentSuccess }: PaymentModalProps) => {
@@ -46,6 +54,16 @@ const PaymentModal = ({ event, isOpen, onClose, bookingData, onPaymentSuccess }:
     });
   };
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePayment = async () => {
     if (event.price === 0) {
       // Free event - process directly
@@ -56,14 +74,80 @@ const PaymentModal = ({ event, isOpen, onClose, bookingData, onPaymentSuccess }:
     setLoading(true);
     
     try {
-      // TODO: Integrate with Razorpay
-      // For now, simulate payment success
-      toast({
-        title: "Payment Integration Coming Soon",
-        description: "Razorpay integration will be added next. For now, booking is confirmed.",
+      // Load Razorpay script
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error('Failed to load Razorpay SDK');
+      }
+
+      // Create Razorpay order
+      const { data: order, error: orderError } = await supabase.functions.invoke('create-razorpay-order', {
+        body: {
+          amount: bookingData.totalPrice,
+          currency: 'INR',
+          receipt: `event_${event.id}_${Date.now()}`
+        }
       });
-      
-      onPaymentSuccess();
+
+      if (orderError) throw orderError;
+
+      // Initialize Razorpay payment
+      const options = {
+        key: 'rzp_test_9WsLnHkratti5e', // This will be replaced with your actual key
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Event Booking',
+        description: `Booking for ${event.title}`,
+        order_id: order.id,
+        handler: async (response: any) => {
+          try {
+            // Verify payment
+            const { data: verification, error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              }
+            });
+
+            if (verifyError || !verification.valid) {
+              throw new Error('Payment verification failed');
+            }
+
+            toast({
+              title: "Payment successful!",
+              description: "Your booking has been confirmed.",
+            });
+            
+            onPaymentSuccess();
+          } catch (error: any) {
+            toast({
+              title: "Payment verification failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+        },
+        prefill: {
+          name: bookingData.buyerName,
+          email: bookingData.buyerEmail,
+          contact: bookingData.buyerPhone
+        },
+        theme: {
+          color: '#3B82F6'
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', (response: any) => {
+        toast({
+          title: "Payment failed",
+          description: response.error.description,
+          variant: "destructive",
+        });
+      });
+
+      razorpay.open();
     } catch (error: any) {
       toast({
         title: "Payment failed",
@@ -153,7 +237,7 @@ const PaymentModal = ({ event, isOpen, onClose, bookingData, onPaymentSuccess }:
               disabled={loading}
             >
               <CreditCard className="w-4 h-4 mr-2" />
-              {loading ? "Processing..." : event.price === 0 ? "Confirm Booking" : "Pay Now"}
+              {loading ? "Processing..." : event.price === 0 ? "Confirm Booking" : "Pay with Razorpay"}
             </Button>
           </div>
         </div>
