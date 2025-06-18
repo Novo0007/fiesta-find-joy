@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_actions: {
+        Row: {
+          action_type: string
+          admin_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           booking_code: string | null
@@ -19,11 +49,14 @@ export type Database = {
           event_id: string
           id: string
           payment_id: string | null
+          qr_code: string | null
           status: Database["public"]["Enums"]["booking_status"] | null
           tickets: number | null
           total_amount: number
           updated_at: string | null
           user_id: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
           booking_code?: string | null
@@ -34,11 +67,14 @@ export type Database = {
           event_id: string
           id?: string
           payment_id?: string | null
+          qr_code?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
           tickets?: number | null
           total_amount: number
           updated_at?: string | null
           user_id: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
           booking_code?: string | null
@@ -49,11 +85,14 @@ export type Database = {
           event_id?: string
           id?: string
           payment_id?: string | null
+          qr_code?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
           tickets?: number | null
           total_amount?: number
           updated_at?: string | null
           user_id?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: [
           {
@@ -75,6 +114,10 @@ export type Database = {
           id: string
           image: string | null
           max_attendees: number | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_notes: string | null
+          moderation_status: string | null
           organizer_id: string
           price: number | null
           status: string | null
@@ -95,6 +138,10 @@ export type Database = {
           id?: string
           image?: string | null
           max_attendees?: number | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_notes?: string | null
+          moderation_status?: string | null
           organizer_id: string
           price?: number | null
           status?: string | null
@@ -115,6 +162,10 @@ export type Database = {
           id?: string
           image?: string | null
           max_attendees?: number | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_notes?: string | null
+          moderation_status?: string | null
           organizer_id?: string
           price?: number | null
           status?: string | null
@@ -166,8 +217,12 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          organization: string | null
+          phone: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          status: string | null
           updated_at: string | null
+          website: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -176,8 +231,12 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          organization?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          status?: string | null
           updated_at?: string | null
+          website?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -186,8 +245,12 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          organization?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          status?: string | null
           updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -220,6 +283,56 @@ export type Database = {
           {
             foreignKeyName: "reviews_event_id_fkey"
             columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_reports: {
+        Row: {
+          created_at: string | null
+          details: string | null
+          id: string
+          reason: string
+          report_type: string
+          reported_event_id: string | null
+          reported_user_id: string | null
+          reporter_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason: string
+          report_type: string
+          reported_event_id?: string | null
+          reported_user_id?: string | null
+          reporter_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason?: string
+          report_type?: string
+          reported_event_id?: string | null
+          reported_user_id?: string | null
+          reporter_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_reported_event_id_fkey"
+            columns: ["reported_event_id"]
             isOneToOne: false
             referencedRelation: "events"
             referencedColumns: ["id"]
@@ -260,6 +373,10 @@ export type Database = {
         Returns: boolean
       }
       generate_booking_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_qr_code: {
         Args: Record<PropertyKey, never>
         Returns: string
       }

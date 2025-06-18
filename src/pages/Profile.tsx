@@ -2,9 +2,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import Header from "@/components/Header";
-import MyBookings from "@/components/MyBookings";
+import ProfileManagement from "@/components/ProfileManagement";
 
-const MyBookingsPage = () => {
+const Profile = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -24,12 +24,12 @@ const MyBookingsPage = () => {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
-          <MyBookings />
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
+          <ProfileManagement />
         </div>
       </main>
     </div>
   );
 };
 
-export default MyBookingsPage;
+export default Profile;

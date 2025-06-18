@@ -10,6 +10,9 @@ import Auth from "./pages/Auth";
 import Browse from "./pages/Browse";
 import CreateEvent from "./pages/CreateEvent";
 import MyBookings from "./pages/MyBookings";
+import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
+import ValidateTicket from "./pages/ValidateTicket";
 import NotFound from "./pages/NotFound";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
@@ -27,6 +30,9 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/browse" element={<Browse />} />
             <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/validate-ticket" element={<ValidateTicket />} />
             <Route
               path="/create-event"
               element={
