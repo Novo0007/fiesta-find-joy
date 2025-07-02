@@ -34,11 +34,10 @@ export const useUserRole = () => {
         if (error && error.code !== 'PGRST116') {
           console.error('Error fetching user role:', error);
           setUserRole('user'); // Default to user role on error
-          setLoading(false);
           return;
         }
 
-        if (data) {
+        if (data?.role) {
           console.log('User role found:', data.role);
           setUserRole(data.role);
         } else {

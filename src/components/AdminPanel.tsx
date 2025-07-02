@@ -62,7 +62,7 @@ const AdminPanel = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch users with roles
+      // Fetch users with roles - use left join to get all users
       const { data: usersData, error: usersError } = await supabase
         .from('profiles')
         .select(`
