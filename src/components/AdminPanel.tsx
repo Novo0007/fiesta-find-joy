@@ -23,7 +23,7 @@ interface User {
   id: string;
   email: string;
   full_name: string | null;
-  role: string;
+  role: 'user' | 'organizer' | 'admin';
   status: string;
   created_at: string;
 }
@@ -71,7 +71,7 @@ const AdminPanel = () => {
           full_name,
           status,
           created_at,
-          user_roles!inner(role)
+          user_roles(role)
         `);
 
       if (usersError) throw usersError;
@@ -92,9 +92,9 @@ const AdminPanel = () => {
 
       if (reportsError) throw reportsError;
 
-      setUsers(usersData?.map(user => ({
+      setUsers(usersData?.map((user: any) => ({
         ...user,
-        role: user.user_roles[0]?.role || 'user'
+        role: (user.user_roles && user.user_roles[0]?.role) || 'user' as 'user' | 'organizer' | 'admin'
       })) || []);
       setEvents(eventsData || []);
       setReports(reportsData || []);
@@ -109,7 +109,7 @@ const AdminPanel = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: string) => {
+  const updateUserRole = async (userId: string, newRole: 'user' | 'organizer' | 'admin') => {
     try {
       // Delete existing role
       await supabase
@@ -285,7 +285,7 @@ const AdminPanel = () => {
                     <div className="flex gap-2">
                       <Select
                         value={user.role}
-                        onValueChange={(value) => updateUserRole(user.id, value)}
+                        onValueChange={(value) => updateUserRole(user.id, value as 'user' | 'organizer' | 'admin')}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
