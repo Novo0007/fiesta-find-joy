@@ -197,7 +197,7 @@ const PaymentModal = ({ event, isOpen, onClose, bookingData, onPaymentSuccess }:
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span>Tickets ({bookingData.ticketQuantity})</span>
-                <span>{formatCurrency(event.price * bookingData.ticketQuantity)}</span>
+                <span>₹{event.price * bookingData.ticketQuantity}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Buyer</span>
@@ -216,7 +216,7 @@ const PaymentModal = ({ event, isOpen, onClose, bookingData, onPaymentSuccess }:
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span className="text-blue-600">{formatCurrency(bookingData.totalPrice)}</span>
+                <span className="text-blue-600">₹{bookingData.totalPrice}</span>
               </div>
             </CardContent>
           </Card>

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sheet,
   SheetContent,
@@ -16,139 +17,16 @@ import {
 } from "@/components/ui/sheet";
 import Header from "@/components/Header";
 import EventCard from "@/components/EventCard";
-import { Event } from "@/hooks/useEvents";
+import { useEvents } from "@/hooks/useEvents";
 
 const Browse = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
   const [dateFilter, setDateFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
 
-  // Mock events data - formatted to match Event interface
-  const allEvents: Event[] = [
-    {
-      id: "tech-conf-2024",
-      title: "Tech Conference 2024",
-      description: "Join industry leaders for cutting-edge tech discussions and networking opportunities",
-      date: "2024-07-15",
-      time: "09:00:00",
-      venue: "Convention Center, Downtown",
-      price: 149,
-      max_attendees: 500,
-      current_attendees: 234,
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-      category: "Technology",
-      tags: ["tech", "conference", "networking"],
-      organizer_id: "org-1",
-      status: "active",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      tickets_sold: 234,
-      ticket_limit: 500
-    },
-    {
-      id: "summer-music-fest",
-      title: "Summer Music Festival",
-      description: "Three days of amazing music, food trucks, and unforgettable memories",
-      date: "2024-08-01",
-      time: "16:00:00",
-      venue: "Central Park",
-      price: 89,
-      max_attendees: 2000,
-      current_attendees: 1547,
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
-      category: "Music",
-      tags: ["music", "festival", "outdoor"],
-      organizer_id: "org-2",
-      status: "active",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      tickets_sold: 1547,
-      ticket_limit: 2000
-    },
-    {
-      id: "digital-marketing-workshop",
-      title: "Digital Marketing Workshop",
-      description: "Learn the latest strategies from marketing experts and grow your business",
-      date: "2024-07-25",
-      time: "14:00:00",
-      venue: "Business Hub, City Center",
-      price: 75,
-      max_attendees: 100,
-      current_attendees: 89,
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7",
-      category: "Business",
-      tags: ["business", "marketing", "workshop"],
-      organizer_id: "org-3",
-      status: "active",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      tickets_sold: 89,
-      ticket_limit: 100
-    },
-    {
-      id: "yoga-in-the-park",
-      title: "Yoga in the Park",
-      description: "Start your day with peaceful yoga sessions in beautiful outdoor settings",
-      date: "2024-07-20",
-      time: "07:00:00",
-      venue: "Riverside Park",
-      price: 0,
-      max_attendees: 50,
-      current_attendees: 45,
-      image: "https://images.unsplash.com/photo-1501854140801-50d01698950b",
-      category: "Health",
-      tags: ["health", "yoga", "outdoor"],
-      organizer_id: "org-4",
-      status: "active",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      tickets_sold: 45,
-      ticket_limit: 50
-    },
-    {
-      id: "food-wine-tasting",
-      title: "Food & Wine Tasting",
-      description: "Explore exotic flavors and premium wines curated by top chefs",
-      date: "2024-08-10",
-      time: "19:00:00",
-      venue: "Grand Hotel Ballroom",
-      price: 120,
-      max_attendees: 100,
-      current_attendees: 156,
-      image: "https://images.unsplash.com/photo-1469041797191-50ace28483c3",
-      category: "Food",
-      tags: ["food", "wine", "tasting"],
-      organizer_id: "org-5",
-      status: "active",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      tickets_sold: 156,
-      ticket_limit: 100
-    },
-    {
-      id: "art-gallery-opening",
-      title: "Art Gallery Opening",
-      description: "Discover contemporary art from emerging and established artists",
-      date: "2024-07-18",
-      time: "18:00:00",
-      venue: "Modern Art Gallery",
-      price: 25,
-      max_attendees: 50,
-      current_attendees: 78,
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-      category: "Art",
-      tags: ["art", "gallery", "opening"],
-      organizer_id: "org-6",
-      status: "active",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z",
-      tickets_sold: 78,
-      ticket_limit: 50
-    }
-  ];
-
+  const { data: allEvents = [], isLoading, error } = useEvents();
   const categories = ["all", "Technology", "Music", "Business", "Health", "Food", "Art", "Sports"];
 
   const filteredEvents = allEvents.filter(event => {
@@ -203,18 +81,18 @@ const Browse = () => {
     <div className="space-y-6">
       <div>
         <h3 className="font-semibold mb-3">Price Range</h3>
-        <Slider
-          value={priceRange}
-          onValueChange={setPriceRange}
-          max={500}
-          min={0}
-          step={10}
-          className="mb-2"
-        />
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>${priceRange[0]}</span>
-          <span>${priceRange[1]}</span>
-        </div>
+          <Slider
+            value={priceRange}
+            onValueChange={setPriceRange}
+            max={5000}
+            min={0}
+            step={50}
+            className="mb-2"
+          />
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>₹{priceRange[0]}</span>
+            <span>₹{priceRange[1]}</span>
+          </div>
       </div>
 
       <div>
@@ -341,7 +219,36 @@ const Browse = () => {
 
           {/* Events Grid */}
           <div className="flex-1">
-            {sortedEvents.length > 0 ? (
+            {isLoading ? (
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card key={i} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                    <div className="p-0">
+                      <Skeleton className="h-48 w-full rounded-t-lg" />
+                    </div>
+                    <div className="p-6">
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-2/3 mb-4" />
+                      <div className="flex justify-between">
+                        <Skeleton className="h-6 w-16" />
+                        <Skeleton className="h-8 w-20" />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-16">
+                <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-12 h-12 text-red-400" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-600 mb-4">Failed to load events</h3>
+                <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                  We're having trouble loading events. Please try again later.
+                </p>
+              </div>
+            ) : sortedEvents.length > 0 ? (
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {sortedEvents.map((event) => (
                   <EventCard key={event.id} event={event} />
@@ -360,7 +267,7 @@ const Browse = () => {
                   onClick={() => {
                     setSearchQuery("");
                     setSelectedCategory("all");
-                    setPriceRange([0, 500]);
+                    setPriceRange([0, 5000]);
                     setDateFilter("all");
                   }}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full px-8"

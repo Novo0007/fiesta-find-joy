@@ -142,7 +142,7 @@ const EventCard = ({ event, onBookingComplete }: EventCardProps) => {
         <CardFooter className="p-6 pt-0 flex items-center justify-between">
           <div>
             <p className="text-2xl font-bold text-gray-900">
-              {eventData.price === 0 ? 'Free' : `$${eventData.price}`}
+              {eventData.price === 0 ? 'Free' : `₹${eventData.price}`}
             </p>
             {event.max_attendees && (
               <p className="text-sm text-gray-500">

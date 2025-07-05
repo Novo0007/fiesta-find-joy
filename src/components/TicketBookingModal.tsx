@@ -151,7 +151,7 @@ const TicketBookingModal = ({ event, isOpen, onClose, onBookingComplete }: Ticke
                 </div>
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="text-lg px-3 py-1">
-                    {event.price === 0 ? 'Free' : `${formatCurrency(event.price)} per ticket`}
+                    {event.price === 0 ? 'Free' : `₹${event.price} per ticket`}
                   </Badge>
                   <span className="text-sm text-gray-500">
                     {availableTickets} tickets available
@@ -258,7 +258,7 @@ const TicketBookingModal = ({ event, isOpen, onClose, onBookingComplete }: Ticke
                   className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   disabled={loading || availableTickets < ticketQuantity}
                 >
-                  {event.price === 0 ? "Book Free Tickets" : `Continue to Payment - ${formatCurrency(totalPrice)}`}
+                  {event.price === 0 ? "Book Free Tickets" : `Continue to Payment - ₹${totalPrice}`}
                 </Button>
               </div>
             </form>
