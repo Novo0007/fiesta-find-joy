@@ -93,7 +93,7 @@ const PaymentModal = ({ event, isOpen, onClose, bookingData, onPaymentSuccess }:
 
       // Initialize Razorpay payment
       const options = {
-        key: 'rzp_test_9WsLnHkratti5e', // This will be replaced with your actual key
+        key: 'rzp_live_uEV76dlTQYpxEl',
         amount: order.amount,
         currency: order.currency,
         name: 'Event Booking',
