@@ -62,19 +62,19 @@ const AdminPanel = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch users with roles - use left join to get all users
+      // Fetch users from profiles
       const { data: usersData, error: usersError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          email,
-          full_name,
-          status,
-          created_at,
-          user_roles(role)
-        `);
+        .select('id, email, full_name, status, created_at');
 
       if (usersError) throw usersError;
+
+      // Fetch user roles separately
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
 
       // Fetch events pending moderation
       const { data: eventsData, error: eventsError } = await supabase
@@ -92,10 +92,16 @@ const AdminPanel = () => {
 
       if (reportsError) throw reportsError;
 
-      setUsers(usersData?.map((user: any) => ({
-        ...user,
-        role: (user.user_roles && user.user_roles[0]?.role) || 'user' as 'user' | 'organizer' | 'admin'
-      })) || []);
+      // Combine users with their roles
+      const usersWithRoles = usersData?.map((user: any) => {
+        const userRole = rolesData?.find(role => role.user_id === user.id);
+        return {
+          ...user,
+          role: (userRole?.role || 'user') as 'user' | 'organizer' | 'admin'
+        };
+      }) || [];
+
+      setUsers(usersWithRoles);
       setEvents(eventsData || []);
       setReports(reportsData || []);
     } catch (error: any) {
