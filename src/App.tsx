@@ -13,6 +13,7 @@ import MyBookings from "./pages/MyBookings";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import ValidateTicket from "./pages/ValidateTicket";
+import HackerNews from "./pages/HackerNews";
 import NotFound from "./pages/NotFound";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/validate-ticket" element={<ValidateTicket />} />
+            <Route path="/hackernews" element={<HackerNews />} />
             <Route
               path="/create-event"
               element={

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, User, LogOut, Plus, Ticket, Shield, QrCode } from "lucide-react";
+import { Calendar, User, LogOut, Plus, Ticket, Shield, QrCode, Newspaper } from "lucide-react";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -45,6 +45,12 @@ const Header = () => {
             className="text-gray-600 hover:text-gray-900 transition-colors"
           >
             Browse Events
+          </Link>
+          <Link 
+            to="/hackernews" 
+            className="text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            Hacker News
           </Link>
           {user && (
             <Link 
