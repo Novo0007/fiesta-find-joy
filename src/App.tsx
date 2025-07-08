@@ -16,6 +16,7 @@ import ValidateTicket from "./pages/ValidateTicket";
 import HackerNews from "./pages/HackerNews";
 import NotFound from "./pages/NotFound";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
+import BottomNav from "./components/BottomNav";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <BottomNav />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
